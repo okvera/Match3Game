@@ -1,7 +1,9 @@
 #pragma once
 
 #include "cocos2d.h"
+
 USING_NS_CC;
+using namespace std;
 
 class Chip
 {
@@ -10,7 +12,9 @@ public:
 	Chip(int type = -1)
 	{
 		this->type = type;
-		sprite = nullptr;
+
+		string chipIconName = to_string(type) + ".png";
+		sprite = Sprite::create(chipIconName);
 	};
 
 	Sprite* sprite;	

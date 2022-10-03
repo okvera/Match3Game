@@ -4,30 +4,24 @@
 USING_NS_CC;
 using namespace std;
 
-int N;	// field size
-int K;	// chip diversity
-
 const int CHIP_SIZE = 32;
 
-vector<vector<Chip*>> field;
+int fieldSizeInTiles;	// TODO static member
+int chipTypesAmount;	 // TODO static member
 
-Chip* selectedChip = nullptr;
-int selectedChipI = -1;
-int selectedChipJ = -1;
-
-static bool needToCheckState = false;
+Game* game = new Game();
 
 Scene* MainScene::createScene(int fieldSize, int chipTypesNum)
 {
 	if (fieldSize > 0)
 	{
-		N = fieldSize;
+		fieldSizeInTiles = fieldSize;
 	}
 	if (chipTypesNum > 0)
 	{
-		K = chipTypesNum;
+		chipTypesAmount = chipTypesNum;
 	}
-	
+	game->create(fieldSizeInTiles, chipTypesAmount);	// TODO ?
 	return MainScene::create();
 }
 
@@ -39,38 +33,33 @@ bool MainScene::init()
 	}
 
 	// generate field and ships data
-	srand(time(NULL));
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 
+	// create background
 	auto background = DrawNode::create();
 	background->drawSolidRect(Director::getInstance()->getVisibleOrigin(), visibleSize, Color4F(0.2, 0.2, 0.2, 1.0));
 	this->addChild(background);
 
-	// create background grid
-	float baseWidth, baseHeight;
-	baseWidth = baseHeight = N * CHIP_SIZE;
+	// create grid
+	float baseWidth = fieldSizeInTiles * CHIP_SIZE;
+	float baseHeight = fieldSizeInTiles * CHIP_SIZE;
 	fieldOrigin = Vec2((visibleSize.width - baseWidth) * 0.5, (visibleSize.height - baseHeight) * 0.5);
-	for (size_t i = 0; i < N; i++)
+	for (size_t i = 0; i < fieldSizeInTiles; i++)
 	{
-		for (size_t j = 0; j < N; j++)
+		for (size_t j = 0; j < fieldSizeInTiles; j++)
 		{
 			auto backSprite = Sprite::create("back.png");
-			backSprite->setAnchorPoint(Vec2(Vec2::ZERO));
+			backSprite->setAnchorPoint(Vec2::ZERO);
 			backSprite->setPosition(fieldOrigin.x + i * CHIP_SIZE, fieldOrigin.y + j * CHIP_SIZE);
 			this->addChild(backSprite, 0);
 		}
 	}
 
 	// create game field
-	int counter = 0;
-	if (!field.empty())
-	{
-		field.clear();
-	}
-	field.resize(N, vector<Chip*>(N));
 	fillEmptyTiles();
 	
+	// add touch listener
 	auto eventListener = EventListenerTouchOneByOne::create();
 	eventListener->onTouchBegan = CC_CALLBACK_2(MainScene::onTouchBegan, this);
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(eventListener, this);
@@ -84,46 +73,44 @@ bool MainScene::onTouchBegan(Touch* touch, Event* event)
 	int j = (touchLocation.y - fieldOrigin.y) / CHIP_SIZE;
 
 	// check for limits
-	if (i < 0 || i > N - 1 || j < 0 || j > N - 1)
+	if (i < 0 || i > fieldSizeInTiles - 1 || j < 0 || j > fieldSizeInTiles - 1)
 		return true;
-	if (field[i][j] == nullptr)
+	if (game->field[i][j] == nullptr)
 	{
 		return true;
 	}
-	if (selectedChip == nullptr)
+	if (selectedChip->data == nullptr)
 	{
-		field[i][j]->select();
-		selectedChip = field[i][j];
-		selectedChipI = i;
-		selectedChipJ = j;
+		game->field[i][j]->select();
+		selectedChip->data = game->field[i][j];
+		selectedChip->i = i;
+		selectedChip->j = j;
 		return true;
 	}
-	if (selectedChipI == i && selectedChipJ == j)
+	if (selectedChip->i == i && selectedChip->j == j)
 	{
-		field[i][j]->unselect();
-		selectedChip = nullptr;
-		selectedChipI = -1;
-		selectedChipJ = -1;
+		game->field[i][j]->unselect();
+		selectedChip->data = nullptr;
+		selectedChip->i = -1;
+		selectedChip->j = -1;
 		return true;
 	}
-	int distX = abs(selectedChipI - i);
-	int distY = abs(selectedChipJ - j);
+	int distX = abs(selectedChip->i - i);
+	int distY = abs(selectedChip->j - j);
 	if (distX <= 1 && distY <= 1 && (distX != distY))
 	{
-		field[i][j]->select();
+		game->field[i][j]->select();
+
 		// fake swap
-		
-		int x1 = field[i][j]->sprite->getPositionX();
-		int y1 = field[i][j]->sprite->getPositionY();
-		int x2 = selectedChip->sprite->getPositionX();
-		int y2 = selectedChip->sprite->getPositionY();
-		auto moveAction1 = MoveTo::create(0.3, Vec2(x1, y1));
-		auto moveAction2 = MoveTo::create(0.3, Vec2(x2, y2));
-		selectedChip->sprite->runAction(moveAction1);
-		field[i][j]->sprite->runAction(moveAction2);
+		Vec2 firstChipPosition{ game->field[i][j]->sprite->getPositionX(), game->field[i][j]->sprite->getPositionY()};
+		Vec2 secondChipPosition{selectedChip->data->sprite->getPositionX(), selectedChip->data->sprite->getPositionY()};
+		auto moveAction1 = MoveTo::create(0.3, firstChipPosition);
+		auto moveAction2 = MoveTo::create(0.3, secondChipPosition);
+		selectedChip->data->sprite->runAction(moveAction1);
+		game->field[i][j]->sprite->runAction(moveAction2);
 		
 
-		if (*field[i][j] == *selectedChip || !explodeIfPossible(make_pair(i, j), make_pair(selectedChipI, selectedChipJ)))
+		if (*game->field[i][j] == *selectedChip->data || !explodeIfPossible(make_pair(i, j), make_pair(selectedChip->i, selectedChip->j)))
 		{
 			// fake swap backwards
 			cocos2d::Vector<cocos2d::FiniteTimeAction*> actions1;
@@ -136,75 +123,43 @@ bool MainScene::onTouchBegan(Touch* touch, Event* event)
 			actions2.pushBack(moveAction1);
 			actions2.pushBack(ScaleTo::create(0.3, 1.0));
 
-			selectedChip->sprite->runAction(Sequence::create(actions1));
-			field[i][j]->sprite->runAction(Sequence::create(actions2));
+			selectedChip->data->sprite->runAction(Sequence::create(actions1));
+			game->field[i][j]->sprite->runAction(Sequence::create(actions2));
 		}
-		selectedChip = nullptr;
-		selectedChipI = -1;
-		selectedChipJ = -1;
+		selectedChip->data = nullptr;
+		selectedChip->i = -1;
+		selectedChip->j = -1;
 		return true;
 	}
 	else
 	{
-		selectedChip->unselect();
-		field[i][j]->select();
-		selectedChip = field[i][j];
-		selectedChipI = i;
-		selectedChipJ = j;
+		selectedChip->data->unselect();
+		game->field[i][j]->select();
+		selectedChip->data = game->field[i][j];
+		selectedChip->i = i;
+		selectedChip->j = j;
 	}
 	return true;
 }
 
-void MainScene::dropTilesDown()
-{
-	bool needToDrop = false;
-	for (size_t i = 0; i < N; i++)
-	{
-		int gapCounter = 0;
-		for (size_t j = 0; j < N; j++)
-			if (field[i][j] == nullptr)
-			{
-				gapCounter++;
-			}
-			else if (gapCounter > 0)
-			{
-				needToDrop = true;
-				int x1 = field[i][j]->sprite->getPositionX();
-				int y1 = field[i][j]->sprite->getPositionY();
-				auto moveAction = MoveTo::create(0.3, Vec2(x1, y1 - CHIP_SIZE * gapCounter));
-				field[i][j]->sprite->runAction(moveAction);
-
-				field[i][j - gapCounter] = field[i][j];
-				field[i][j] = nullptr;
-			}
-	}
-	fillEmptyTiles();
-}
-
 void MainScene::fillEmptyTiles()
 {
-	for (size_t i = 0; i < N; i++)
+	for (size_t i = 0; i < fieldSizeInTiles; i++)
 	{
-		for (size_t j = 0; j < N; j++)
-			if (field[i][j] == nullptr)
+		for (size_t j = 0; j < fieldSizeInTiles; j++)
+			if (game->field[i][j] == nullptr)
 			{
-				int chipId = rand() % K + 1;
+				Sprite* sprite = game->createChip(i, j)->sprite;
 
-				string chipIconName = to_string(chipId) + ".png";
-				auto chipSprite = Sprite::create(chipIconName);
-				chipSprite->setAnchorPoint(Vec2(0, 0));
-				chipSprite->setPosition(fieldOrigin.x + i * CHIP_SIZE, fieldOrigin.y + j * CHIP_SIZE);
-				chipSprite->setOpacity(1);
+				sprite->setAnchorPoint(Vec2::ZERO);
+				sprite->setPosition(fieldOrigin.x + i * CHIP_SIZE, fieldOrigin.y + j * CHIP_SIZE);
+				sprite->setOpacity(1);
+				this->addChild(sprite, 1);
 
 				cocos2d::Vector<cocos2d::FiniteTimeAction*> actions;
 				actions.pushBack(DelayTime::create(0.3));
 				actions.pushBack(FadeTo::create(0.3, 255));
-				chipSprite->runAction(Sequence::create(actions));
-
-				this->addChild(chipSprite, 1);
-				Chip* c = new Chip(chipId);
-				c->sprite = chipSprite;
-				field[i][j] = c;
+				sprite->runAction(Sequence::create(actions));
 			}
 	}
 	auto callback = CallFunc::create(CC_CALLBACK_0(MainScene::explodeAllIfPossible, this));
@@ -215,11 +170,11 @@ void MainScene::fillEmptyTiles()
 bool MainScene::explodeAllIfPossible()	// use update input
 {
 	set<pair<int, int>> result;
-	for (size_t i = 0; i < N; i++)
+	for (size_t i = 0; i < fieldSizeInTiles; i++)
 	{
-		for (size_t j = 0; j < N; j++)
+		for (size_t j = 0; j < fieldSizeInTiles; j++)
 		{
-			getLines(field, i, j, result);
+			game->getLines(i, j, result);
 		}
 	}
 	if (result.size() >= 3)
@@ -227,9 +182,8 @@ bool MainScene::explodeAllIfPossible()	// use update input
 		executeExplosion(result);
 		return true;
 	}
-	if (!isMovePossible())
+	if (!game->isMovePossible())
 	{
-		//field.clear();
 		auto scene = GameOverScene::createScene();
 		Director::getInstance()->replaceScene(TransitionFade::create(1.0, scene));
 	}
@@ -242,139 +196,55 @@ bool MainScene::explodeIfPossible(pair<int, int> x, pair<int, int> y)
 	int j1 = x.second;
 	int i2 = y.first;
 	int j2 = y.second;
-	swap(field[i1][j1], field[i2][j2]);
+	swap(game->field[i1][j1], game->field[i2][j2]);
 
 	// check both chips
 	set<pair<int, int>> result;
-	if (getLines(field, i1, j1, result) || getLines(field, i2, j2, result))
+	if (game->getLines(i1, j1, result) || game->getLines(i2, j2, result))
 	{
 		//explode
-		field[i1][j1]->unselect();
-		field[i2][j2]->unselect();
+		game->field[i1][j1]->unselect();
+		game->field[i2][j2]->unselect();
 		executeExplosion(result);
 		return true;
 	}
 	else
 	{
 		// swap backwards
-		swap(field[i2][j2], field[i1][j1]);
+		swap(game->field[i2][j2], game->field[i1][j1]);
 		return false;
 	}
 }
 
-void MainScene::executeExplosion(const set<pair<int, int>>& result)
+void MainScene::executeExplosion(const set<pair<int, int>>& chips)
 {
-	for (auto iter = result.begin(); iter != result.end(); iter++)
-	{
-		field[iter->first][iter->second]->explode();
-		field[iter->first][iter->second] = nullptr;
-	}
-	// exploded
+	game->explodeChips(chips);
+
 	auto callback = CallFunc::create(CC_CALLBACK_0(MainScene::dropTilesDown, this));
 	auto pauseAction = DelayTime::create(0.3);
 	this->runAction(Sequence::create(pauseAction, callback, nullptr));
 }
 
-bool MainScene::isMovePossible()
+void MainScene::dropTilesDown()
 {
-	for (int i = 0; i < N; i++)
+	for (size_t i = 0; i < fieldSizeInTiles; i++)
 	{
-		for (int j = 0; j < N; j++)
-		{
-			if (i > 2)
+		int gapCounter = 0;
+		for (size_t j = 0; j < fieldSizeInTiles; j++)
+			if (game->field[i][j] == nullptr)
 			{
-				if (*field[i - 3][j] == *field[i][j] && *field[i - 2][j] == *field[i][j])
-				{
-					return true;
-				}
+				gapCounter++;
 			}
-			if (i < N - 3)
+			else if (gapCounter > 0)
 			{
-				if (*field[i + 3][j] == *field[i][j] && *field[i + 2][j] == *field[i][j])
-				{
-					return true;
-				}
+				int x = game->field[i][j]->sprite->getPositionX();
+				int y = game->field[i][j]->sprite->getPositionY();
+				auto moveAction = MoveTo::create(0.3, Vec2(x, y - CHIP_SIZE * gapCounter));
+				game->field[i][j]->sprite->runAction(moveAction);
+
+				game->field[i][j - gapCounter] = game->field[i][j];
+				game->field[i][j] = nullptr;
 			}
-			if (j > 2)
-			{
-				if (*field[i][j - 3] == *field[i][j] && *field[i][j - 2] == *field[i][j])
-				{
-					return true;
-				}
-			}
-			if (j < N - 3)
-			{
-				if (*field[i][j + 3] == *field[i][j] && *field[i][j + 2] == *field[i][j])
-				{
-					return true;
-				}
-			}
-		}
 	}
-	return false;
-}
-
-bool MainScene::getLines(const vector<vector<Chip*>>& vec, const int i, const int j, set<pair<int, int>>& result)
-{
-	set<pair<int, int>> local;
-	int size = 0;
-	bool found = false;
-
-	// horizontal check
-	for (int k = i - 1; k >= 0; k--)
-	{
-		if (*vec[k][j] == *vec[k + 1][j])
-		{
-			local.insert(make_pair(k, j));
-		}
-		else
-			break;
-	}
-	for (int k = i + 1; k < N; k++)
-	{
-		if (*vec[k][j] == *vec[k - 1][j])
-		{
-			local.insert(make_pair(k, j));
-		}
-		else
-			break;
-	}
-	if (local.size() >= 2)
-	{
-		found = true;
-		result.insert(local.begin(), local.end());
-	}
-	local.clear();
-
-	// vertical check
-	for (int k = j - 1; k >= 0; k--)
-	{
-		if (*vec[i][k] == *vec[i][k + 1])
-		{
-			local.insert(make_pair(i, k));
-		}
-		else
-			break;
-	}
-	for (int k = j + 1; k < N; k++)
-	{
-		if (*vec[i][k] == *vec[i][k - 1])
-		{
-			local.insert(make_pair(i, k));
-		}
-		else
-			break;
-	}
-	if (local.size() >= 2)
-	{
-		found = true;
-		result.insert(local.begin(), local.end());
-	}
-
-	// add initial chip
-	if (found)
-	{
-		result.insert(make_pair(i, j));
-	}
-	return found;
+	fillEmptyTiles();
 }
