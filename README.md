@@ -1,6 +1,7 @@
 # Match3Game
 Simple match-three game with Cocos2d-x framework
 
+<b>Rules:</b><br/>
 Player can pick two chips located in adjacent cells vertically or horizontally and swap them.
 If 3 or more chips match in a line, they burn out, chips from above fall in their cells.
 Empty cells are filled with new chips randomly.
