@@ -2,12 +2,11 @@
 #include "GameOverScene.h"
 
 USING_NS_CC;
-using namespace std;
 
-const int CHIP_SIZE = 32;
+constexpr int CHIP_SIZE{ 32 };
 
-int fieldSizeInTiles;	// TODO static member
-int chipTypesAmount;	 // TODO static member
+int fieldSizeInTiles{0};	// TODO static member
+int chipTypesAmount{0};	 // TODO static member
 
 Game* game = new Game();
 
@@ -45,9 +44,9 @@ bool MainScene::init()
 	float baseWidth = fieldSizeInTiles * CHIP_SIZE;
 	float baseHeight = fieldSizeInTiles * CHIP_SIZE;
 	fieldOrigin = Vec2((visibleSize.width - baseWidth) * 0.5, (visibleSize.height - baseHeight) * 0.5);
-	for (size_t i = 0; i < fieldSizeInTiles; ++i)
+	for (auto i{ 0 }; i < fieldSizeInTiles; ++i)
 	{
-		for (size_t j = 0; j < fieldSizeInTiles; ++j)
+		for (auto j{ 0 }; j < fieldSizeInTiles; ++j)
 		{
 			auto backSprite = Sprite::create("back.png");
 			backSprite->setAnchorPoint(Vec2::ZERO);
@@ -69,8 +68,8 @@ bool MainScene::init()
 bool MainScene::onTouchBegan(Touch* touch, Event* event)
 {
 	Vec2 touchLocation = touch->getLocation();
-	int i = (touchLocation.x - fieldOrigin.x) / CHIP_SIZE;
-	int j = (touchLocation.y - fieldOrigin.y) / CHIP_SIZE;
+	const int i{ static_cast<int>(touchLocation.x - fieldOrigin.x) / CHIP_SIZE };
+	const int j{ static_cast<int>(touchLocation.y - fieldOrigin.y) / CHIP_SIZE };
 
 	// check for limits
 	if (i < 0 || i > fieldSizeInTiles - 1 || j < 0 || j > fieldSizeInTiles - 1)
@@ -95,8 +94,8 @@ bool MainScene::onTouchBegan(Touch* touch, Event* event)
 		selectedChip->j = -1;
 		return true;
 	}
-	int distX = abs(selectedChip->i - i);
-	int distY = abs(selectedChip->j - j);
+	int distX{ abs(selectedChip->i - i) };
+	int distY{ abs(selectedChip->j - j) };
 	if (distX <= 1 && distY <= 1 && (distX != distY))
 	{
 		game->field[i][j]->select();
@@ -110,7 +109,7 @@ bool MainScene::onTouchBegan(Touch* touch, Event* event)
 		game->field[i][j]->sprite->runAction(moveAction2);
 		
 
-		if (*game->field[i][j] == *selectedChip->data || !explodeIfPossible(make_pair(i, j), make_pair(selectedChip->i, selectedChip->j)))
+		if (*game->field[i][j] == *selectedChip->data || !explodeIfPossible(std::make_pair(i, j), std::make_pair(selectedChip->i, selectedChip->j)))
 		{
 			// fake swap backwards
 			cocos2d::Vector<cocos2d::FiniteTimeAction*> actions1;
@@ -144,9 +143,9 @@ bool MainScene::onTouchBegan(Touch* touch, Event* event)
 
 void MainScene::fillEmptyTiles()
 {
-	for (size_t i = 0; i < fieldSizeInTiles; ++i)
+	for (int i{ 0 }; i < fieldSizeInTiles; ++i)
 	{
-		for (size_t j = 0; j < fieldSizeInTiles; ++j)
+		for (int j{ 0 }; j < fieldSizeInTiles; ++j)
 			if (game->field[i][j] == nullptr)
 			{
 				Sprite* sprite = game->createChip(i, j)->sprite;
@@ -169,10 +168,10 @@ void MainScene::fillEmptyTiles()
 
 bool MainScene::explodeAllIfPossible()	// use update input
 {
-	set<pair<int, int>> result;
-	for (size_t i = 0; i < fieldSizeInTiles; ++i)
+	pairSet result{};
+	for (int i{ 0 }; i < fieldSizeInTiles; ++i)
 	{
-		for (size_t j = 0; j < fieldSizeInTiles; ++j)
+		for (int j{ 0 }; j < fieldSizeInTiles; ++j)
 		{
 			game->getLines(i, j, result);
 		}
@@ -190,16 +189,16 @@ bool MainScene::explodeAllIfPossible()	// use update input
 	return false;
 }
 
-bool MainScene::explodeIfPossible(pair<int, int> x, pair<int, int> y)
+bool MainScene::explodeIfPossible(std::pair<int, int> x, std::pair<int, int> y)
 {
-	int i1 = x.first;
-	int j1 = x.second;
-	int i2 = y.first;
-	int j2 = y.second;
-	swap(game->field[i1][j1], game->field[i2][j2]);
+	int i1{ x.first };
+	int j1{ x.second };
+	int i2{ y.first };
+	int j2{ y.second };
+	std::swap(game->field[i1][j1], game->field[i2][j2]);
 
 	// check both chips
-	set<pair<int, int>> result;
+	pairSet result;
 	if (game->getLines(i1, j1, result) || game->getLines(i2, j2, result))
 	{
 		//explode
@@ -211,12 +210,12 @@ bool MainScene::explodeIfPossible(pair<int, int> x, pair<int, int> y)
 	else
 	{
 		// swap backwards
-		swap(game->field[i2][j2], game->field[i1][j1]);
+		std::swap(game->field[i2][j2], game->field[i1][j1]);
 		return false;
 	}
 }
 
-void MainScene::executeExplosion(const set<pair<int, int>>& chips)
+void MainScene::executeExplosion(const pairSet& chips)
 {
 	game->explodeChips(chips);
 
@@ -227,10 +226,10 @@ void MainScene::executeExplosion(const set<pair<int, int>>& chips)
 
 void MainScene::dropTilesDown()
 {
-	for (size_t i = 0; i < fieldSizeInTiles; ++i)
+	for (int i{ 0 }; i < fieldSizeInTiles; ++i)
 	{
-		int gapCounter = 0;
-		for (size_t j = 0; j < fieldSizeInTiles; ++j)
+		int gapCounter{ 0 };
+		for (int j{ 0 }; j < fieldSizeInTiles; ++j)
 			if (game->field[i][j] == nullptr)
 			{
 				++gapCounter;

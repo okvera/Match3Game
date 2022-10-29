@@ -3,15 +3,16 @@
 
 #include "Game.h"
 #include "cocos2d.h"
+
 USING_NS_CC;
 
 class WelcomeScene : public Scene
 {
-    int fieldSize = { START_FIELD_SIZE };
-    int chipTypesNum = { START_CHIP_AMOUNT };
+    int fieldSize{ START_FIELD_SIZE };
+    int chipTypesNum{ START_CHIP_AMOUNT };
 
-    Label* fieldSizeLabel;
-    Label* chipTypesNumLabel;
+    Label* fieldSizeLabel{};
+    Label* chipTypesNumLabel{};
 
 public:
     static Scene* createScene();

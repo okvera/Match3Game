@@ -4,17 +4,16 @@
 #include "cocos2d.h"
 
 USING_NS_CC;
-using namespace std;
 
 class Chip
 {
-	int type = -1;
+	int type{ -1 };
 public:
 	Chip(int type = -1)
 	{
 		this->type = type;
 
-		string chipIconName = to_string(type) + ".png";
+		std::string chipIconName = std::to_string(type) + ".png";
 		sprite = Sprite::create(chipIconName);
 	};
 

@@ -1,7 +1,5 @@
 #include "Chip.h"
 
-using namespace std;
-
 void Chip::select()
 {
 	if (sprite != nullptr)

@@ -9,38 +9,38 @@ void Game::create(int fieldSize, int chipAmount)
 	{
 		field.clear();
 	}
-	field.resize(fieldSizeInTiles, vector<Chip*>(fieldSizeInTiles));
+	field.resize(fieldSizeInTiles, std::vector<Chip*>(fieldSizeInTiles));
 
 	srand(time(NULL));
 }
 
 Chip* Game::createChip(const int i, const int j)
 {
-	int chipType = rand() % chipTypesAmount + 1;
+	const int chipType{ rand() % chipTypesAmount + 1 };
 
 	field[i][j] = new Chip(chipType);
 	return field[i][j];
 }
 
-void Game::explodeChips(const set<pair<int, int>>& chips)
+void Game::explodeChips(const pairSet& chips)
 {
-	for (auto iter = chips.begin(); iter != chips.end(); ++iter)
+	for (auto iter:chips)
 	{
 		//Chip* chip = field[iter->first][iter->second];
-		field[iter->first][iter->second]->explode();
-		field[iter->first][iter->second] = nullptr;
+		field[iter.first][iter.second]->explode();
+		field[iter.first][iter.second] = nullptr;
 	}
 }
 
 bool Game::isMovePossible()
 {
-	Chip* throughTwo = nullptr;
-	Chip* throughOne = nullptr;
-	Chip* current = nullptr;
+	Chip* throughTwo{ nullptr };
+	Chip* throughOne{ nullptr };
+	Chip* current{ nullptr };
 
-	for (int i = 0; i < fieldSizeInTiles; ++i)
+	for (int i{ 0 }; i < fieldSizeInTiles; ++i)
 	{
-		for (int j = 0; j < fieldSizeInTiles; ++j)
+		for (int j{ 0 }; j < fieldSizeInTiles; ++j)
 		{
 			current = field[i][j];
 			if (i > 2)
@@ -84,27 +84,26 @@ bool Game::isMovePossible()
 	return false;
 }
 
-bool Game::getLines(const int i, const int j, set<pair<int, int>>& result)
+bool Game::getLines(const int i, const int j, pairSet& result)
 {
-	set<pair<int, int>> local;
-	int size = 0;
-	bool found = false;
+	pairSet local{};
+	bool found{ false };
 
 	// horizontal check
-	for (int k = i - 1; k >= 0; --k)
+	for (int k{ i - 1 }; k >= 0; --k)
 	{
 		if (*field[k][j] == *field[k + 1][j])
 		{
-			local.insert(make_pair(k, j));
+			local.insert(std::make_pair(k, j));
 		}
 		else
 			break;
 	}
-	for (int k = i + 1; k < fieldSizeInTiles; ++k)
+	for (int k{ i + 1 }; k < fieldSizeInTiles; ++k)
 	{
 		if (*field[k][j] == *field[k - 1][j])
 		{
-			local.insert(make_pair(k, j));
+			local.insert(std::make_pair(k, j));
 		}
 		else
 			break;
@@ -117,20 +116,20 @@ bool Game::getLines(const int i, const int j, set<pair<int, int>>& result)
 	local.clear();
 
 	// vertical check
-	for (int k = j - 1; k >= 0; --k)
+	for (int k{ j - 1 }; k >= 0; --k)
 	{
 		if (*field[i][k] == *field[i][k + 1])
 		{
-			local.insert(make_pair(i, k));
+			local.insert(std::make_pair(i, k));
 		}
 		else
 			break;
 	}
-	for (int k = j + 1; k < fieldSizeInTiles; ++k)
+	for (int k{ j + 1 }; k < fieldSizeInTiles; ++k)
 	{
 		if (*field[i][k] == *field[i][k - 1])
 		{
-			local.insert(make_pair(i, k));
+			local.insert(std::make_pair(i, k));
 		}
 		else
 			break;
@@ -144,7 +143,7 @@ bool Game::getLines(const int i, const int j, set<pair<int, int>>& result)
 	// add initial chip
 	if (found)
 	{
-		result.insert(make_pair(i, j));
+		result.insert(std::make_pair(i, j));
 	}
 	return found;
 }

@@ -3,7 +3,6 @@
 #include "ui/UIButton.h";
 
 USING_NS_CC;
-using namespace std;
 
 Scene* WelcomeScene::createScene()
 {
