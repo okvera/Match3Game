@@ -45,9 +45,9 @@ bool MainScene::init()
 	float baseWidth = fieldSizeInTiles * CHIP_SIZE;
 	float baseHeight = fieldSizeInTiles * CHIP_SIZE;
 	fieldOrigin = Vec2((visibleSize.width - baseWidth) * 0.5, (visibleSize.height - baseHeight) * 0.5);
-	for (size_t i = 0; i < fieldSizeInTiles; i++)
+	for (size_t i = 0; i < fieldSizeInTiles; ++i)
 	{
-		for (size_t j = 0; j < fieldSizeInTiles; j++)
+		for (size_t j = 0; j < fieldSizeInTiles; ++j)
 		{
 			auto backSprite = Sprite::create("back.png");
 			backSprite->setAnchorPoint(Vec2::ZERO);
@@ -144,9 +144,9 @@ bool MainScene::onTouchBegan(Touch* touch, Event* event)
 
 void MainScene::fillEmptyTiles()
 {
-	for (size_t i = 0; i < fieldSizeInTiles; i++)
+	for (size_t i = 0; i < fieldSizeInTiles; ++i)
 	{
-		for (size_t j = 0; j < fieldSizeInTiles; j++)
+		for (size_t j = 0; j < fieldSizeInTiles; ++j)
 			if (game->field[i][j] == nullptr)
 			{
 				Sprite* sprite = game->createChip(i, j)->sprite;
@@ -170,9 +170,9 @@ void MainScene::fillEmptyTiles()
 bool MainScene::explodeAllIfPossible()	// use update input
 {
 	set<pair<int, int>> result;
-	for (size_t i = 0; i < fieldSizeInTiles; i++)
+	for (size_t i = 0; i < fieldSizeInTiles; ++i)
 	{
-		for (size_t j = 0; j < fieldSizeInTiles; j++)
+		for (size_t j = 0; j < fieldSizeInTiles; ++j)
 		{
 			game->getLines(i, j, result);
 		}
@@ -227,13 +227,13 @@ void MainScene::executeExplosion(const set<pair<int, int>>& chips)
 
 void MainScene::dropTilesDown()
 {
-	for (size_t i = 0; i < fieldSizeInTiles; i++)
+	for (size_t i = 0; i < fieldSizeInTiles; ++i)
 	{
 		int gapCounter = 0;
-		for (size_t j = 0; j < fieldSizeInTiles; j++)
+		for (size_t j = 0; j < fieldSizeInTiles; ++j)
 			if (game->field[i][j] == nullptr)
 			{
-				gapCounter++;
+				++gapCounter;
 			}
 			else if (gapCounter > 0)
 			{

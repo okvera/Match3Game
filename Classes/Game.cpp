@@ -24,7 +24,7 @@ Chip* Game::createChip(const int i, const int j)
 
 void Game::explodeChips(const set<pair<int, int>>& chips)
 {
-	for (auto iter = chips.begin(); iter != chips.end(); iter++)
+	for (auto iter = chips.begin(); iter != chips.end(); ++iter)
 	{
 		//Chip* chip = field[iter->first][iter->second];
 		field[iter->first][iter->second]->explode();
@@ -38,9 +38,9 @@ bool Game::isMovePossible()
 	Chip* throughOne = nullptr;
 	Chip* current = nullptr;
 
-	for (int i = 0; i < fieldSizeInTiles; i++)
+	for (int i = 0; i < fieldSizeInTiles; ++i)
 	{
-		for (int j = 0; j < fieldSizeInTiles; j++)
+		for (int j = 0; j < fieldSizeInTiles; ++j)
 		{
 			current = field[i][j];
 			if (i > 2)
@@ -91,7 +91,7 @@ bool Game::getLines(const int i, const int j, set<pair<int, int>>& result)
 	bool found = false;
 
 	// horizontal check
-	for (int k = i - 1; k >= 0; k--)
+	for (int k = i - 1; k >= 0; --k)
 	{
 		if (*field[k][j] == *field[k + 1][j])
 		{
@@ -100,7 +100,7 @@ bool Game::getLines(const int i, const int j, set<pair<int, int>>& result)
 		else
 			break;
 	}
-	for (int k = i + 1; k < fieldSizeInTiles; k++)
+	for (int k = i + 1; k < fieldSizeInTiles; ++k)
 	{
 		if (*field[k][j] == *field[k - 1][j])
 		{
@@ -117,7 +117,7 @@ bool Game::getLines(const int i, const int j, set<pair<int, int>>& result)
 	local.clear();
 
 	// vertical check
-	for (int k = j - 1; k >= 0; k--)
+	for (int k = j - 1; k >= 0; --k)
 	{
 		if (*field[i][k] == *field[i][k + 1])
 		{
@@ -126,7 +126,7 @@ bool Game::getLines(const int i, const int j, set<pair<int, int>>& result)
 		else
 			break;
 	}
-	for (int k = j + 1; k < fieldSizeInTiles; k++)
+	for (int k = j + 1; k < fieldSizeInTiles; ++k)
 	{
 		if (*field[i][k] == *field[i][k - 1])
 		{

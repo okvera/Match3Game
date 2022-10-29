@@ -48,10 +48,10 @@ bool WelcomeScene::init()
         {
             case ui::Widget::TouchEventType::BEGAN:
                 break;
-            case ui::Widget::TouchEventType::ENDED:                
+            case ui::Widget::TouchEventType::ENDED:
                 if (fieldSize < MAX_FIELD_SIZE)
                 {
-                    fieldSize++;
+                    ++fieldSize;
                     char buf[20];
                     snprintf(buf, sizeof(buf), "Field Size: %2d", fieldSize);
                     fieldSizeLabel->setString(buf);
@@ -73,7 +73,7 @@ bool WelcomeScene::init()
             case ui::Widget::TouchEventType::ENDED:
                 if (fieldSize > MIN_FIELD_SIZE)
                 {
-                    fieldSize--;
+                    --fieldSize;
                     char buf[20];
                     snprintf(buf, sizeof(buf), "Field Size: %2d", fieldSize);
                     fieldSizeLabel->setString(buf);
@@ -103,7 +103,7 @@ bool WelcomeScene::init()
             case ui::Widget::TouchEventType::ENDED:
                 if (chipTypesNum < MAX_CHIP_AMOUNT)
                 {
-                    chipTypesNum++;
+                    ++chipTypesNum;
                     char buf[20];
                     snprintf(buf, sizeof(buf), "Chip types: %2d", chipTypesNum);
                     chipTypesNumLabel->setString(buf);
@@ -123,7 +123,7 @@ bool WelcomeScene::init()
             case ui::Widget::TouchEventType::ENDED:
                 if (chipTypesNum > MIN_CHIP_AMOUNT)
                 {
-                    chipTypesNum--;
+                    --chipTypesNum;
                     char buf[20];
                     snprintf(buf, sizeof(buf), "Chip types: %2d", chipTypesNum);
                     chipTypesNumLabel->setString(buf);
