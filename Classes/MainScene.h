@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MAINSCENE_H
+#define MAINSCENE_H
 
 #include "cocos2d.h"
 #include "Chip.h"
@@ -32,3 +33,4 @@ public:
 	CREATE_FUNC(MainScene);
 };
 
+#endif	// MAINSCENE_H

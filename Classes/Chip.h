@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHIP_H
+#define CHIP_H
 
 #include "cocos2d.h"
 
@@ -29,3 +30,4 @@ public:
 	void explode();
 };
 
+#endif	// CHIP_H

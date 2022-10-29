@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WELCOMESCENE_H
+#define WELCOMESCENE_H
 
 #include "Game.h"
 #include "cocos2d.h"
@@ -20,3 +21,4 @@ public:
     CREATE_FUNC(WelcomeScene);
 };
 
+#endif  // WELCOMESCENE_H

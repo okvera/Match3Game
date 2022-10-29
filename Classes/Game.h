@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAME_H
+#define GAME_H
 
 #include "Chip.h"
 
@@ -37,3 +38,5 @@ public:
 	bool isMovePossible();
 	bool getLines(const int i, const int j, set<pair<int, int>>& result);
 };
+
+#endif	// GAME_H

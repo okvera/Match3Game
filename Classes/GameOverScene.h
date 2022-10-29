@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAMEOVERSCENE_H
+#define GAMEOVERSCENE_H 
 
 #include "cocos2d.h"
 USING_NS_CC;
@@ -13,3 +14,4 @@ public:
     CREATE_FUNC(GameOverScene);
 };
 
+#endif  // GAMEOVERSCENE_H
