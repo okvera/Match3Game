@@ -8,18 +8,21 @@ USING_NS_CC;
 
 class WelcomeScene : public Scene
 {
-    int fieldSize{ START_FIELD_SIZE };
-    int chipTypesNum{ START_CHIP_AMOUNT };
+	int fieldSize{ START_FIELD_SIZE };
+	int chipTypesNum{ START_CHIP_AMOUNT };
 
-    Label* fieldSizeLabel{};
-    Label* chipTypesNumLabel{};
+	Label* fieldSizeLabel{};
+	Label* chipTypesNumLabel{};
+
+	const std::string fieldSizeText{ "Field Size: " };
+	const std::string chipTypesText{ "Chip types: " };
 
 public:
-    static Scene* createScene();
+	static Scene* createScene();
 
-    virtual bool init();
+	virtual bool init();
 
-    CREATE_FUNC(WelcomeScene);
+	CREATE_FUNC(WelcomeScene);
 };
 
 #endif  // WELCOMESCENE_H

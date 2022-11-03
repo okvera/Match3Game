@@ -33,10 +33,7 @@ bool WelcomeScene::init()
     }
 
     // settings --- field size
-    char buf[20];
-    snprintf(buf, sizeof(buf), "Field Size: %2d", fieldSize);
-
-    fieldSizeLabel = Label::createWithTTF(buf, "fonts/Marker Felt.ttf", 32);
+    fieldSizeLabel = Label::createWithTTF({ fieldSizeText + std::to_string(fieldSize) }, "fonts/Marker Felt.ttf", 32);
     fieldSizeLabel->setAnchorPoint(Vec2(1.0, 0.5));
     fieldSizeLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 + 70, origin.y + visibleSize.height / 2 + 50));
     this->addChild(fieldSizeLabel, 1);
@@ -51,9 +48,7 @@ bool WelcomeScene::init()
                 if (fieldSize < MAX_FIELD_SIZE)
                 {
                     ++fieldSize;
-                    char buf[20];
-                    snprintf(buf, sizeof(buf), "Field Size: %2d", fieldSize);
-                    fieldSizeLabel->setString(buf);
+                    fieldSizeLabel->setString({ fieldSizeText + std::to_string(fieldSize) });
                 }
                 break;
             default:
@@ -73,9 +68,7 @@ bool WelcomeScene::init()
                 if (fieldSize > MIN_FIELD_SIZE)
                 {
                     --fieldSize;
-                    char buf[20];
-                    snprintf(buf, sizeof(buf), "Field Size: %2d", fieldSize);
-                    fieldSizeLabel->setString(buf);
+                    fieldSizeLabel->setString({ fieldSizeText + std::to_string(fieldSize) });
                 }
                 break;
             default:
@@ -86,8 +79,7 @@ bool WelcomeScene::init()
     this->addChild(sizeBtnDown);
 
     // settings --- chips type amount
-    snprintf(buf, sizeof(buf), "Chip types: %2d", chipTypesNum);
-    chipTypesNumLabel = Label::createWithTTF(buf, "fonts/Marker Felt.ttf", 32);
+    chipTypesNumLabel = Label::createWithTTF({ chipTypesText + std::to_string(chipTypesNum) }, "fonts/Marker Felt.ttf", 32);
     chipTypesNumLabel->setAnchorPoint(Vec2(1.0, 0.5));
     chipTypesNumLabel->setPosition(Vec2(origin.x + visibleSize.width / 2 + 70, origin.y + visibleSize.height / 2 - 10));
     this->addChild(chipTypesNumLabel, 1);
@@ -103,9 +95,7 @@ bool WelcomeScene::init()
                 if (chipTypesNum < MAX_CHIP_AMOUNT)
                 {
                     ++chipTypesNum;
-                    char buf[20];
-                    snprintf(buf, sizeof(buf), "Chip types: %2d", chipTypesNum);
-                    chipTypesNumLabel->setString(buf);
+                    chipTypesNumLabel->setString({ chipTypesText + std::to_string(chipTypesNum) });
                 }
                 break;
             default:
@@ -123,9 +113,7 @@ bool WelcomeScene::init()
                 if (chipTypesNum > MIN_CHIP_AMOUNT)
                 {
                     --chipTypesNum;
-                    char buf[20];
-                    snprintf(buf, sizeof(buf), "Chip types: %2d", chipTypesNum);
-                    chipTypesNumLabel->setString(buf);
+                    chipTypesNumLabel->setString({ chipTypesText + std::to_string(chipTypesNum) });
                 }
                 break;
             default:
